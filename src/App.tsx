@@ -56,7 +56,7 @@ export default function App() {
       <h1 className="game-title">Tic-Tac-Toe</h1>
       <Status xIsNext={xIsNext} winner={winner} />
       <Board board={currentSquares} onClick={handleClick}/>
-      <Controls onUndo={handleUndo} onReset={handleReset}/>
+      <Controls onUndo={handleUndo} onReset={handleReset} isUndoDisabled={currentMove === 0} isResetDisabled={currentMove === 0}/>
     </div>
   );
 }
