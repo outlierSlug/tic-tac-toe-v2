@@ -12,19 +12,19 @@ export default function Status(props: StatusProps) {
   // Otherwise, show the next player.
   if (winner === "Draw") {
     return (
-      <div className="draw">
+      <div className="status">
         Draw!
       </div>
     );
   } else if (winner) {
     return (
-      <div>
+      <div className="status">
         Winner: <span className={winner === "X"? "x-marker" : "o-marker"}>{winner}</span>
       </div>
     );
   } else {
     return (
-      <div>
+      <div className="status">
         Next Player: <span className={xIsNext ? "x-marker" : "o-marker"}>{xIsNext ? "X" : "O"}</span>
       </div>
     );

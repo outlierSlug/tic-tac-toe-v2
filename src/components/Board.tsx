@@ -9,7 +9,7 @@ type BoardProps = {
 export default function Board(props: BoardProps) {
   const {board, onClick} = props;
   return (
-    <>
+    <div className="board">
       <div className="board-row">
         <Square value={board[0]} onClick={() => onClick(0)}/>
         <Square value={board[1]} onClick={() => onClick(1)}/>
@@ -25,6 +25,6 @@ export default function Board(props: BoardProps) {
         <Square value={board[7]} onClick={() => onClick(7)}/>
         <Square value={board[8]} onClick={() => onClick(8)}/>
       </div>
-    </>
+    </div>
   );
 }
