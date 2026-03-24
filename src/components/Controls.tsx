@@ -12,7 +12,7 @@ export default function Controls(props: ControlsProps) {
       <button onClick={onUndo} disabled={isUndoDisabled}>
         Undo
       </button>
-      <button onClick={onReset} disabled={isUndoDisabled}>
+      <button onClick={onReset} disabled={isResetDisabled}>
         Reset
       </button>
     </div>
