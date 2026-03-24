@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { GameBoard, Winner, GameResult } from "./types";
+import type { GameBoard, GameResult } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
@@ -48,6 +48,12 @@ export default function App() {
     }
   }
 
+  const handleRedo = () : void => {
+    if (currentMove < history.length - 1) {
+      setCurrentMove(currentMove + 1);
+    }
+  }
+
   const handleReset = () : void => {
     setHistory([Array(9).fill(null)]);
     setCurrentMove(0);
@@ -58,7 +64,12 @@ export default function App() {
       <h1 className="game-title">Tic-Tac-Toe</h1>
       <Status xIsNext={xIsNext} winner={winner} />
       <Board board={currentSquares} onClick={handleClick} winningSquares={winningSquares}/>
-      <Controls onUndo={handleUndo} onReset={handleReset} isUndoDisabled={currentMove === 0} isResetDisabled={currentMove === 0}/>
+      <Controls onUndo={handleUndo}
+                onRedo={handleRedo}
+                onReset={handleReset}
+                isUndoDisabled={currentMove === 0}
+                isRedoDisabled={currentMove === history.length - 1}
+                isResetDisabled={history.length === 1 && currentMove === 0}/>
     </div>
   );
 }
