@@ -1,0 +1,20 @@
+{
+  "name": "tic-tac-toe-v2",
+  "version": "1.0.0",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/outlierSlug/tic-tac-toe-v2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/outlierSlug/tic-tac-toe-v2/issues"
+  },
+  "homepage": "https://github.com/outlierSlug/tic-tac-toe-v2#readme",
+  "description": "Full-stack tic-tac-toe app built with React, Typescript, and Express"
+}
