@@ -45,6 +45,12 @@
   background: #ddd;
 }
 
+/* Highlight for winning squares */
+.square.highlight {
+  box-shadow: 0 0 3px 2px #4CAF50;  
+  transition: box-shadow 0.3s, border 0.3s;
+}
+
 /* X and O markers */
 .x-marker {
   color: blue; /* Blue for X */

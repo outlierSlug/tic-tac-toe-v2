@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { GameBoard, Winner } from "./types";
+import type { GameBoard, Winner, GameResult } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
@@ -17,12 +17,14 @@ export default function App() {
   const xIsNext: boolean = currentMove % 2 === 0;
   const currentSquares: GameBoard = history[currentMove];
 
-  // Check for a winner.
-  const winner: Winner = calculateWinner(currentSquares);
+  // Check for a potential winner and the winning squares.
+  const gameResult: GameResult = calculateWinner(currentSquares);
+  const winner = gameResult.winner;
+  const winningSquares = gameResult.winningSquares;
 
   const handleClick = (index: number): void => {
     // A square cannot be clicked on twice, and none can be clicked if the game is over.
-    if (currentSquares[index] || calculateWinner(currentSquares)) {
+    if (currentSquares[index] || winner) {
       return;
     }
 
@@ -55,14 +57,15 @@ export default function App() {
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
       <Status xIsNext={xIsNext} winner={winner} />
-      <Board board={currentSquares} onClick={handleClick}/>
+      <Board board={currentSquares} onClick={handleClick} winningSquares={winningSquares}/>
       <Controls onUndo={handleUndo} onReset={handleReset} isUndoDisabled={currentMove === 0} isResetDisabled={currentMove === 0}/>
     </div>
   );
 }
 
 // Helper function to calculate whether there is a winner in the current board state.
-function calculateWinner(board: GameBoard): Winner {
+// Returns a GameResult that contains the winner annd the winning squares.
+function calculateWinner(board: GameBoard): GameResult {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -74,19 +77,20 @@ function calculateWinner(board: GameBoard): Winner {
     [2, 4, 6],
   ];
 
-  // Check if a player has three in a row.
+  // Check if a player has three in a row. 
+  // If they do, return the winner and the winning combination.
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if(board[a] && board[a] === board[b] && board[a] === board[c]) {
-      return board[a];
+      return { winner: board[a], winningSquares: [a, b, c] };
     }
   }
 
   // If the board is full, we have a draw.
   if (board.every((cell) => cell !== null)) {
-    return "Draw";
+    return { winner: "Draw", winningSquares: [] };
   }
 
   // Otherwise, there is no winner yet.
-  return null;
+  return { winner: null, winningSquares: []};
 }
