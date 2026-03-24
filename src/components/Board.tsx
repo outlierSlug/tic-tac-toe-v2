@@ -1,8 +1,8 @@
-import type { Board } from "../types";
+import type { GameBoard } from "../types";
 import Square from "./Square";
 
 type BoardProps = {
-  board: Board;
+  board: GameBoard;
   onClick: (index: number) => void;
 };
 
