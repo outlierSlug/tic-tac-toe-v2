@@ -4,6 +4,7 @@ import type { GameBoard, Winner } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
+import Controls from "./components/Controls";
 
 import "./App.css";
 
@@ -37,17 +38,25 @@ export default function App() {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
-  } 
+  }
+
+  const handleUndo = () : void => {
+    if (currentMove > 0) {
+      setCurrentMove(currentMove - 1);
+    }
+  }
+
+  const handleReset = () : void => {
+    setHistory([Array(9).fill(null)]);
+    setCurrentMove(0);
+  }
 
   return (
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
-      <div className="status">
-        <Status xIsNext={xIsNext} winner={winner} />
-      </div>
-      <div className="board">
-        <Board board={currentSquares} onClick={handleClick}/>
-      </div>
+      <Status xIsNext={xIsNext} winner={winner} />
+      <Board board={currentSquares} onClick={handleClick}/>
+      <Controls onUndo={handleUndo} onReset={handleReset}/>
     </div>
   );
 }
