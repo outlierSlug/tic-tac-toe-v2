@@ -22,6 +22,7 @@
 /* Board and squares */
 .board {
   display: inline-block;
+  margin-bottom: 10px;
 }
 
 .board-row {
@@ -53,7 +54,32 @@
   color: red; /* Red for O */
 }
 
-/* Draw status */
-.draw {
-  color: rgba(0,0,0,0.6);
+/* Game Controls UI*/
+.game-controls { 
+  display: flex;
+  justify-content: center;
+  gap: 12px; 
+  margin-top: 10px;
+}
+
+/* Shared button style */
+.game-controls button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff; /* default blue */
+  color: white;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.game-controls button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+/* Disabled state */
+.game-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
