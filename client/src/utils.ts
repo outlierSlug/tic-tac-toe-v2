@@ -2,7 +2,8 @@ import type { Player, GameBoard, GameResult } from "./types";
 
 /**
  * Determines whether the given value is a record.
- * @param val the value in question
+ * 
+ * @param val - the value to check
  * @return true if the value is a record and false otherwise
  */
 export const isRecord = (val: unknown): val is Record<string, unknown> => {
@@ -10,10 +11,14 @@ export const isRecord = (val: unknown): val is Record<string, unknown> => {
 }
 
 /**
- * Helper function to calculate whether there is a winner in the current board state.
- * Returns a GameResult that contains the winner annd the winning squares.
+ * Determines the result of the current board state.
+ * Checks all possible winning combinations (three in a row).
+ * 
+ * @param board - the current game board
+ * @returns a GameResult containing the winner and winning square indices, if any.
  */
 export const calculateWinner = (board: GameBoard): GameResult => {
+  // All 8 possible winning combinations (rows, columns, diagonals)
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -39,6 +44,6 @@ export const calculateWinner = (board: GameBoard): GameResult => {
     return { winner: "Draw", winningSquares: [] };
   }
 
-  // Otherwise, there is no winner yet.
+  // Otherwise, there is no winner yet. Game is still in progress.
   return { winner: null, winningSquares: []};
 }
