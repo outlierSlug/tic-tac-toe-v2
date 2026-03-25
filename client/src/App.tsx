@@ -5,7 +5,9 @@ import type { GameBoard, GameResult } from "./types";
 import Board from "./components/Board";
 import Status from "./components/Status";
 import Controls from "./components/Controls";
-import { isRecord, calculateWinner } from "./utils";
+
+import { getGameState, saveGameState } from "./api";
+import { calculateWinner } from "./utils";
 
 import "./App.css";
 
@@ -23,87 +25,17 @@ export default function App() {
   const winner = gameResult.winner;
   const winningSquares = gameResult.winningSquares;
 
-  // GET /game
-  // Fetch the current game state from the /game server endpoint.
-  const getGameState = (): void => {
-    fetch("http://localhost:8080/game")
-      .then(doGetResp)
-      .catch(doGetError);
-  }
+  // GET current game state on mount
+  useEffect(() => {getGameState(setHistory, setCurrentMove)}, []);
 
-  // Process server response. 
-  const doGetResp = (res: Response): void => {
-    if (res.status === 200) {
-      res.json()
-        .then(doGetJson)
-        .catch(doGetError);
-    } else if (res.status === 400) {
-      res.text()
-        .then(doGetError)
-        .catch(doGetError);
-    } else {
-      doGetError(`Unexpected response status: ${res.status}`);
-    }
-  }
-
-  // If server reponded with 200 OK, process JSON response and update state.
-  const doGetJson = (data: unknown): void => {
-    if (!isRecord(data)) {
-      doGetError(`Data is not a record: ${typeof data}`);
-      return;
-    }
-
-    if (!Array.isArray(data.history)) {
-      doGetError(`data.history is not an array: ${typeof data.history}`);
-      return;
-    }
-
-    if (typeof data.currentMove !== "number") {
-      doGetError(`data.currentMove is not a number: ${typeof data.currentMove}`);
-      return;
-    }
-
-    if ( data.currentMove < 0 || data.currentMove >= ((data.history as GameBoard[]).length)) {
-      doGetError("currentMove is out of bounds");
-      return;
-    }
-
-    setHistory(data.history as GameBoard[]);
-    setCurrentMove(data.currentMove);
-  }
-
-  // Handle any getGameState errors during fetch process.
-  const doGetError = (err: unknown): void => {
-    console.error("Error fetching '/game', ", err);
-  }
-
-  // POST /game
-  const saveGameState = (history: GameBoard[], currentMove: number): void => {
-    fetch("http://localhost:8080/game", {
-        method: "POST",
-        body: JSON.stringify({history, currentMove}),
-        headers: {"Content-Type": "application/json"}
-      })
-    .then(doSaveResp)
-    .catch(doSaveError);
-  }
-
-  // Process server response. If server responded with 200 OK, all is good.
-  const doSaveResp = (res: Response) => {
-    if (res.status !== 200) {
-      res.text()
-        .then((msg) => doSaveError(`Unexpected response status: ${res.status}: ${msg}`))
-        .catch(doSaveError);
-    }
-  }
-
-  // Handle any saveGameState errors during fetch process.
-  const doSaveError = (err: unknown): void => {
-    console.error("Error saving to /game: ", err);
-  }
-
+  /**
+   * Handles a game square (cell) clicked on by a player.
+   * Ignores clicks on already-filled squares or after the game has ended.
+   * Updates server and client state on click.
+   *
+   * @param index - the index of the clicked square
+   */
   const handleClick = (index: number): void => {
-    // A square cannot be clicked on twice, and none can be clicked if the game is over.
     if (currentSquares[index] || winner) {
       return;
     }
@@ -127,6 +59,10 @@ export default function App() {
     setCurrentMove(nextHistory.length - 1);
   }
 
+  /**
+   * Handles undo button click.
+   * Moves currentMove pointer one index back in history.
+   */
   const handleUndo = (): void => {
     if (currentMove > 0) {
       saveGameState(history, currentMove - 1);
@@ -134,6 +70,10 @@ export default function App() {
     }
   }
 
+  /**
+   * Handles redo button click.
+   * Moves currentMove pointer one index forward in history.
+   */
   const handleRedo = (): void => {
     if (currentMove < history.length - 1) {
       saveGameState(history, currentMove + 1);
@@ -141,14 +81,15 @@ export default function App() {
     }
   }
 
+  /**
+   * Handles reset button click.
+   * Clears all history and sets currentMove back to 0.
+   */
   const handleReset = (): void => {
     saveGameState([Array(9).fill(null)], 0);
     setHistory([Array(9).fill(null)]);
     setCurrentMove(0);
   }
-
-  // Get current game state on mount
-  useEffect(() => {getGameState()}, []);
 
   return (
     <div className="game">
