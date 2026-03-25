@@ -12,4 +12,4 @@ export type GameBoard = Cell[];
 export type Winner = Player | "Draw" | null;
 
 // The result of the game. Contains a record of the winner and the winning squares, if any.
-export type GameResult = { winner: Winner, winningSquares: number[]} ;
+export type GameResult = { winner: Winner, winningSquares: number[]};
