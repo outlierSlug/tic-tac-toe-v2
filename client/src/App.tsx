@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameResult, type GameSettings } from "./types";
+import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameResult, type GameSettings, type Player } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
@@ -8,7 +8,7 @@ import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 
 import { getGameState, saveGameState, getSettings, saveSettings } from "./api";
-import { calculateWinner, getExpiringSquare, isValidOption, removeExpiringSquare } from "./utils";
+import { calculateWinner, getExpiringSquare, getRandomSquare, isValidOption, removeExpiringSquare } from "./utils";
 
 import "./App.css";
 
@@ -23,9 +23,20 @@ export default function App() {
   // Game settings, configurable before the game starts.
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
 
+  // Flag for computer move delay
+  const [isComputerThinking, setIsComputerThinking] = useState(false);
+
   // Determine the current turn and game state.
   const xIsNext: boolean = currentMove % 2 === 0;
   const currentSquares: GameBoard = history[currentMove];
+
+  const isHumanTurn = (move: number): boolean => {
+    if (settings.player === "X"){
+      return move % 2 === 0;
+    } else {
+      return move % 2 === 1;
+    }
+  }
 
   // Check for a potential winner and the winning squares.
   const gameResult: GameResult = calculateWinner(currentSquares);
@@ -47,13 +58,13 @@ export default function App() {
 
   /**
    * Handles a game square (cell) clicked on by a player.
-   * Ignores clicks on already-filled squares or after the game has ended.
+   * Ignores clicks on already-filled squares, if the computer is moving, or after the game has ended.
    * Updates server and client state on click.
    *
    * @param index - the index of the clicked square
    */
   const handleClick = (index: number): void => {
-    if (currentSquares[index] || winner) {
+    if (currentSquares[index] || winner || isComputerThinking) {
       return;
     }
 
@@ -79,36 +90,120 @@ export default function App() {
     // Update local state
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
+
+    // If playing against computer, trigger computer move
+    if (settings.opponent === "computer" && !calculateWinner(nextSquares).winner) {
+      setIsComputerThinking(true);
+      const computerToken = settings.player === "X" ? "O" : "X";
+      setTimeout(() => {
+        doComputerMove(nextHistory, nextHistory.length - 1, computerToken);
+        setIsComputerThinking(false);
+      }, 1000);
+    }
+  }
+
+  /**
+   * Processes a computer move. 
+   * 
+   * @param currentHistory - the current state of history
+   * @param currentMoveIndex - the current move index
+   * @param computerToken - the opposite of the player token
+   * @returns 
+   */
+  const doComputerMove = (currentHistory: GameBoard[], currentMoveIndex: number, computerToken: Player): void => {
+    const board = currentHistory[currentMoveIndex];
+
+    if (calculateWinner(board).winner) {
+      return;
+    }
+
+    const computerIndex = getRandomSquare(board);
+
+    if (computerIndex === null) {
+      return;
+    }
+
+    const computerSquares = board.slice();
+    computerSquares[computerIndex] = computerToken;
+
+    if (settings.gameMode === "endless") {
+      const computerExpiringSquare = getExpiringSquare(currentHistory, currentMoveIndex);
+      removeExpiringSquare(computerSquares, computerExpiringSquare);
+    }
+
+    const nextHistory = [...currentHistory.slice(0, currentMoveIndex + 1), computerSquares];
+    saveGameState(nextHistory, nextHistory.length - 1);
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
   }
 
   /**
    * Handles undo button click.
-   * Moves currentMove pointer one index back in history.
+   * Moves currentMove pointer one index back in history during local play.
+   * Moves currentMove pointer back to the latest user move when playing against the computer.
+   * 
    */
   const handleUndo = (): void => {
     if (currentMove > 0) {
-      saveGameState(history, currentMove - 1);
-      setCurrentMove(currentMove - 1);
+      let newMove: number;
+      if (settings.opponent === "computer") {
+        newMove = currentMove - 1;
+        while (!isHumanTurn(newMove) && newMove > 0) {
+          if (calculateWinner(history[newMove]).winner) {
+            break;
+          }
+          newMove--;
+        }
+
+        // If we landed on move 0 and human is O, trigger computer first move again
+        if (newMove === 0 && settings.player === "O") {
+          setIsComputerThinking(true);
+          setTimeout(() => {
+            doComputerMove(history, 0, "X");
+            setIsComputerThinking(false);
+          }, 1000);
+        }
+      } else {
+        newMove = currentMove - 1;
+      }
+      saveGameState(history, newMove);
+      setCurrentMove(newMove);
     }
   }
 
   /**
    * Handles redo button click.
-   * Moves currentMove pointer one index forward in history.
+   * Moves currentMove pointer one index forward in history during local play.
+   * Moves currentMove pointer forward to the next user move when playing against the computer.
    */
   const handleRedo = (): void => {
     if (currentMove < history.length - 1) {
-      saveGameState(history, currentMove + 1);
-      setCurrentMove(currentMove + 1);
+      let newMove: number;
+      if (settings.opponent === "computer") {
+        newMove = currentMove + 1;
+        while (!isHumanTurn(newMove) && newMove < history.length - 1) {
+          if (calculateWinner(history[newMove]).winner) {
+            break;
+          }
+          newMove++;
+        }
+      } else {
+        newMove = currentMove + 1;
+      }
+      saveGameState(history, newMove);
+      setCurrentMove(newMove);
     }
   }
 
   /**
    * Handles reset button click.
-   * Clears all history and sets currentMove back to 0.
+   * Clears all history and sets currentMove back to 0. 
+   * Also resets user player to "X" if playing against the computer.
    */
   const handleReset = (): void => {
     const newHistory: GameBoard[] = [Array(settings.gridSize * settings.gridSize).fill(null)];
+    saveSettings({...settings, player: "X"});
+    setSettings({...settings, player: "X"});
     saveGameState(newHistory, 0);
     setHistory(newHistory);
     setCurrentMove(0);
@@ -153,14 +248,33 @@ export default function App() {
     }
   }
 
+/**
+ * Handles player change. Only renders when opponent is selected as "computer".
+ * If the user changes to "O", the game will start and the computer will make the first move automatically.
+ * 
+ * @param evt - the change event from the <select> element
+ */
   const handlePlayerChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const newPlayer = evt.target.value;
     if (isValidOption(newPlayer, PLAYERS)) {
       saveSettings({...settings, player: newPlayer});
       setSettings({...settings, player: newPlayer});
+
+      if (newPlayer === "O") {
+        setIsComputerThinking(true);
+        setTimeout(() => {
+          doComputerMove(history, currentMove, "X");
+          setIsComputerThinking(false);
+        }, 1000)
+      }
     }
   }
 
+  /**
+   * Handles difficulty change. Only renders when opponent is selected as "computer".
+   * 
+   * @param evt - the change event from the <select> element.
+   */
   const handleDifficultyChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const newDifficulty = evt.target.value;
     if (isValidOption(newDifficulty, AI_LEVELS)) {
@@ -188,9 +302,9 @@ export default function App() {
       <Controls onUndo={handleUndo}
                 onRedo={handleRedo}
                 onReset={handleReset}
-                isUndoDisabled={currentMove === 0}
-                isRedoDisabled={currentMove === history.length - 1}
-                isResetDisabled={history.length === 1 && currentMove === 0}/>
+                isUndoDisabled={currentMove === 0 || isComputerThinking}
+                isRedoDisabled={currentMove === history.length - 1 || isComputerThinking}
+                isResetDisabled={history.length === 1 && currentMove === 0 || isComputerThinking}/>
       <Settings gameStarted={hasGameStarted}
                 gameSettings={settings} 
                 onChangeGridSize={handleGridSizeChange}

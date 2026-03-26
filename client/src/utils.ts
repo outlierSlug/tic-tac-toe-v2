@@ -91,14 +91,39 @@ export const getExpiringSquare = (history: GameBoard[], currentMove: number): nu
 }
 
 /**
- * Removes the expering square from the board in endless mode.
+ * Removes the expiring square from the board in endless mode.
  * Mutates the board in place. NEVER call this on state directly, call on a copy.
  * 
  * @param currentSquares 
  * @param expiringSquare 
  */
-export const removeExpiringSquare = (currentSquares: GameBoard, expiringSquare: number | null) => {
+export const removeExpiringSquare = (currentSquares: GameBoard, expiringSquare: number | null): void => {
   if (expiringSquare !== null) {
     currentSquares[expiringSquare] = null;
   }
+}
+
+/**
+ * Returns the index of a random empty square from the game board.
+ * If the board is full, returns null.
+ * 
+ * @param board - the current game board
+ * @returns the index of the randomly chosen empty square. 
+ */
+export const getRandomSquare = (board: GameBoard): number | null  => {
+  const emptyIndices: number[] = [];
+
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] === null) {
+      emptyIndices.push(i);
+    }
+  }
+
+  // If there are no empty squares (board is full), return null.
+  if (emptyIndices.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * emptyIndices.length);
+  return emptyIndices[randomIndex];
 }

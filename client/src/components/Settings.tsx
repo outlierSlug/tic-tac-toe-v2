@@ -23,7 +23,7 @@ export default function Settings(props: SettingsProps) {
       <select id="grid-size-select"
               value={gameSettings.gridSize}
               onChange={onChangeGridSize}
-              disabled={gameStarted}>
+              disabled={gameStarted || gameSettings.player === "O"}>
         <option value="3">3x3</option>
       </select>
       <br></br>
@@ -32,7 +32,7 @@ export default function Settings(props: SettingsProps) {
       <select id="game-mode-select"
               value={gameSettings.gameMode}
               onChange={onChangeMode}
-              disabled={gameStarted}>
+              disabled={gameStarted || gameSettings.player === "O"}>
         <option value="classic">Classic</option>
         <option value="endless">Endless</option>
       </select>
@@ -42,7 +42,7 @@ export default function Settings(props: SettingsProps) {
       <select id="opponent-select"
               value={gameSettings.opponent}
               onChange={onChangeOpponent}
-              disabled={gameStarted}>
+              disabled={gameStarted || gameSettings.player === "O"}>
         <option value="local">Local</option>
         <option value="computer">Computer</option>
       </select>
@@ -52,16 +52,16 @@ export default function Settings(props: SettingsProps) {
           <select id="difficulty-select" 
                   value={gameSettings.difficulty}
                   onChange={onChangeDifficulty}
-                  disabled={gameStarted}>
+                  disabled={gameStarted || gameSettings.player === "O"}>
             <option value="easy">Easy</option>
-            <option value="hard">Hard</option>
+            {/*<option value="hard" disabled>Hard</option>*/}
           </select>
           <br></br>
           <label htmlFor="player-select">Play As: </label>
           <select id="player-select" 
                   value={gameSettings.player}
                   onChange={onChangePlayer}
-                  disabled={gameStarted}>
+                  disabled={gameStarted || gameSettings.player === "O"}>
             <option value="X">X</option>
             <option value="O">O</option>
           </select>
@@ -72,7 +72,7 @@ export default function Settings(props: SettingsProps) {
       {/* Restore Defaults Button*/}
       <button onClick={onRestoreDefaults} 
               title={"Restore settings to default"} 
-              disabled={gameStarted}>
+              disabled={gameStarted || gameSettings.player === "O"}>
         Restore Defaults
       </button>
     </div>
