@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { GAME_MODES, GRID_SIZES, OPPONENTS, type GameBoard, type GameResult, type GameSettings } from "./types";
+import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameResult, type GameSettings } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
@@ -12,7 +12,7 @@ import { calculateWinner, getExpiringSquare, isValidOption, removeExpiringSquare
 
 import "./App.css";
 
-const DEFAULT_SETTINGS: GameSettings = { gridSize: 3, gameMode: "classic", opponent: "local"};
+const DEFAULT_SETTINGS: GameSettings = { gridSize: 3, gameMode: "classic", opponent: "local", player: "X", difficulty: "easy"};
 const DEFAULT_HISTORY: GameBoard[] = [Array(DEFAULT_SETTINGS.gridSize * DEFAULT_SETTINGS.gridSize).fill(null)];
 
 export default function App() {
@@ -153,6 +153,22 @@ export default function App() {
     }
   }
 
+  const handlePlayerChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const newPlayer = evt.target.value;
+    if (isValidOption(newPlayer, PLAYERS)) {
+      saveSettings({...settings, player: newPlayer});
+      setSettings({...settings, player: newPlayer});
+    }
+  }
+
+  const handleDifficultyChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const newDifficulty = evt.target.value;
+    if (isValidOption(newDifficulty, AI_LEVELS)) {
+      saveSettings({...settings, difficulty: newDifficulty});
+      setSettings({...settings, difficulty: newDifficulty});
+    }
+  }
+
   /**
    * Handles button click that restores settings to default.
    */
@@ -180,6 +196,8 @@ export default function App() {
                 onChangeGridSize={handleGridSizeChange}
                 onChangeMode={handleModeChange}
                 onChangeOpponent={handleOpponentChange}
+                onChangePlayer={handlePlayerChange}
+                onChangeDifficulty={handleDifficultyChange}
                 onRestoreDefaults={handleRestoreDefaults}/>
     </div>
   );

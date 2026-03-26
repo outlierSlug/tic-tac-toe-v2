@@ -36,6 +36,8 @@ export type GameResult = {
 export const GRID_SIZES = [3, 4, 5] as const;
 export const GAME_MODES = ["classic", "endless"] as const;
 export const OPPONENTS = ["local", "computer"] as const;
+export const PLAYERS = ["X", "O"] as const;
+export const AI_LEVELS = ["easy", "hard"] as const;
 
 /** Grid sizes for the game board, e.g. 3x3, 4x4 */
 export type GridSize = typeof GRID_SIZES[number];
@@ -46,9 +48,14 @@ export type GameMode = typeof GAME_MODES[number];
 /** Opponent, i.e. are you playing against a friend locally, or against the computer */
 export type Opponent = typeof OPPONENTS[number];
 
+/** AI opponent difficulty (can be easy or hard) */
+export type Difficulty = typeof AI_LEVELS[number];
+
 /** All configurable settings for a game session. */
 export type GameSettings = {
   gridSize: GridSize,
   gameMode: GameMode,
-  opponent: Opponent
+  opponent: Opponent,
+  player: Player,
+  difficulty: Difficulty
 };

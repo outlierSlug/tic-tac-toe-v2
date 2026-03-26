@@ -6,11 +6,15 @@ type SettingsProps = {
   onChangeGridSize: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
   onChangeMode: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
   onChangeOpponent: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
+  onChangePlayer: (evt:React.ChangeEvent<HTMLSelectElement>) => void,
+  onChangeDifficulty: (evt:React.ChangeEvent<HTMLSelectElement>) => void,
   onRestoreDefaults: () => void
 };
 
 export default function Settings(props: SettingsProps) {
-  const { gameStarted, gameSettings, onChangeGridSize, onChangeMode, onChangeOpponent, onRestoreDefaults } = props;
+  const { gameStarted, gameSettings, 
+          onChangeGridSize, onChangeMode, onChangeOpponent, 
+          onChangePlayer, onChangeDifficulty, onRestoreDefaults } = props;
   return (
     <div className="settings-bar">
       <h2>Settings</h2>
@@ -42,6 +46,27 @@ export default function Settings(props: SettingsProps) {
         <option value="local">Local</option>
         <option value="computer">Computer</option>
       </select>
+      {gameSettings.opponent === "computer" && (
+        <div>
+          <label htmlFor="difficulty-select">Difficulty: </label>
+          <select id="difficulty-select" 
+                  value={gameSettings.difficulty}
+                  onChange={onChangeDifficulty}
+                  disabled={gameStarted}>
+            <option value="easy">Easy</option>
+            <option value="hard">Hard</option>
+          </select>
+          <br></br>
+          <label htmlFor="player-select">Play As: </label>
+          <select id="player-select" 
+                  value={gameSettings.player}
+                  onChange={onChangePlayer}
+                  disabled={gameStarted}>
+            <option value="X">X</option>
+            <option value="O">O</option>
+          </select>
+        </div>
+      )}
       <br></br>
       <br></br>
       {/* Restore Defaults Button*/}

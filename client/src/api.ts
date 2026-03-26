@@ -1,4 +1,4 @@
-import { GAME_MODES, GRID_SIZES, OPPONENTS, type GameBoard, type GameSettings } from "./types";
+import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameSettings } from "./types";
 import { isRecord, isValidOption } from "./utils";
 
 // GET methods
@@ -136,8 +136,18 @@ const doGetSettingsJson = (data: unknown, setSettings: (settings: GameSettings) 
     return;
   }
 
+  if (!isValidOption(data.player, PLAYERS)) {
+    doGetError(`data.player is not valid: ${data.player}`);
+    return;
+  }
+
+  if (!isValidOption(data.difficulty, AI_LEVELS)) {
+    doGetError(`data.difficulty is not valid: ${data.difficulty}`);
+    return;
+  }
+
   // Update client state
-  setSettings({gridSize: data.gridSize, gameMode: data.gameMode, opponent: data.opponent});
+  setSettings({gridSize: data.gridSize, gameMode: data.gameMode, opponent: data.opponent, player: data.player, difficulty: data.difficulty});
 }
 
 /**

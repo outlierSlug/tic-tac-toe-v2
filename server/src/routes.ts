@@ -11,11 +11,13 @@ type SafeResponse = Response;
 const gameState = {history: [Array(9).fill(null)], currentMove: 0};
 
 // In-memory storage for the current settings. 
-const gameSettings = {gridSize: 3, gameMode: "classic", opponent: "local"};
+const gameSettings = {gridSize: 3, gameMode: "classic", opponent: "local", player: "X", difficulty: "easy"};
 
 const VALID_GRID_SIZES = [3, 4, 5];
 const VALID_GAME_MODES = ["classic", "endless"];
 const VALID_OPPONENTS = ["local", "computer"];
+const VALID_PLAYERS = ["X", "O"];
+const VALID_DIFFICULTIES = ["easy", "hard"];
 
 /**
  * GET /game
@@ -58,7 +60,7 @@ export const getSettings = (_req: SafeRequest, res: SafeResponse): void => {
 
 // POST /settings
 export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
-  const { gridSize, gameMode, opponent } = req.body;
+  const { gridSize, gameMode, opponent, player, difficulty } = req.body;
 
   if (typeof gridSize !== "number" || !VALID_GRID_SIZES.includes(gridSize)) {
     res.status(400).send("Invalid gridSize");
@@ -75,8 +77,21 @@ export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
     return;
   }
 
+  if (typeof player != "string" || !VALID_PLAYERS.includes(player)) {
+    res.status(400).send("Invalid player");
+    return;
+  }
+
+  if (typeof difficulty != "string" || !VALID_DIFFICULTIES.includes(difficulty)) {
+    res.status(400).send("Invalid difficulty");
+    return;
+  }
+
+
   gameSettings.gridSize = gridSize;
   gameSettings.gameMode = gameMode;
   gameSettings.opponent = opponent;
+  gameSettings.player = player;
+  gameSettings.difficulty = difficulty;
   res.status(200).send("Settings saved successfully");
 }
