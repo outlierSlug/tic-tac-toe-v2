@@ -1,0 +1,46 @@
+import type { GameSettings } from "../types";
+
+type SettingsProps = {
+  gameStarted: boolean,
+  gameSettings: GameSettings,
+  onChangeGridSize: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
+  onChangeMode: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
+  onChangeOpponent: (evt: React.ChangeEvent<HTMLSelectElement>) => void
+};
+
+export default function Settings(props: SettingsProps) {
+  const { gameStarted, gameSettings, onChangeGridSize, onChangeMode, onChangeOpponent } = props;
+  return (
+    <div className="settings-bar">
+      <h2>Settings</h2>
+      {/* Grid Size Select */}
+      <label htmlFor="grid-size-select">Grid Size: </label>
+      <select id="grid-size-select"
+              value={gameSettings.gridSize}
+              onChange={onChangeGridSize}
+              disabled={gameStarted}>
+        <option value="3">3x3</option>
+      </select>
+      <br></br>
+      {/* Game Mode Select */}
+      <label htmlFor="game-mode-select">Game Mode: </label>
+      <select id="game-mode-select"
+              value={gameSettings.gameMode}
+              onChange={onChangeMode}
+              disabled={gameStarted}>
+        <option value="classic">Classic</option>
+        <option value="endless">Endless</option>
+      </select>
+      <br></br>
+      {/* Opponent Select */}
+      <label htmlFor="opponent-select">Opponent: </label>
+      <select id="opponent-select"
+              value={gameSettings.opponent}
+              onChange={onChangeOpponent}
+              disabled={gameStarted}>
+        <option value="local">Local</option>
+        <option value="computer">Computer</option>
+      </select>
+    </div>
+  );
+}

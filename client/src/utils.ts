@@ -11,6 +11,18 @@ export const isRecord = (val: unknown): val is Record<string, unknown> => {
 }
 
 /**
+ * Determines whether the given value is a valid option from a list. 
+ * Used to validate select input values against their allowed types.
+ * 
+ * @param val - the value to check
+ * @param options - the list of valid options
+ * @returns true if the val is in options, false otherwise
+ */
+export const isValidOption = <T>(val: unknown, options: readonly T[]): val is T => {
+  return options.includes(val as T);
+}
+
+/**
  * Determines the result of the current board state.
  * Checks all possible winning combinations (three in a row).
  * 

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 
-import type { GameBoard, GameResult } from "./types";
+import { GAME_MODES, GRID_SIZES, OPPONENTS, type GameBoard, type GameResult, type GameSettings } from "./types";
 
 import Board from "./components/Board";
 import Status from "./components/Status";
 import Controls from "./components/Controls";
+import Settings from "./components/Settings";
 
 import { getGameState, saveGameState } from "./api";
-import { calculateWinner } from "./utils";
+import { calculateWinner, isValidOption } from "./utils";
 
 import "./App.css";
 
@@ -15,6 +16,9 @@ export default function App() {
   // State to track the history of moves (an array of GameBoards) and the current move index
   const [currentMove, setCurrentMove] = useState(0);
   const [history, setHistory] = useState<GameBoard[]>([Array(9).fill(null)]);
+
+  // Game settings, configurable before the game starts.
+  const [settings, setSettings] = useState<GameSettings>({gridSize: 3, gameMode: "classic", opponent: "local"});
 
   // Determine the current turn and game state.
   const xIsNext: boolean = currentMove % 2 === 0;
@@ -24,6 +28,9 @@ export default function App() {
   const gameResult: GameResult = calculateWinner(currentSquares);
   const winner = gameResult.winner;
   const winningSquares = gameResult.winningSquares;
+
+  // Checks if the game has started. Settings are locked once a game begins.
+  const hasGameStarted = currentMove > 0 || history.length > 1;
 
   // GET current game state on mount
   useEffect(() => {getGameState(setHistory, setCurrentMove)}, []);
@@ -91,6 +98,42 @@ export default function App() {
     setCurrentMove(0);
   }
 
+  /**
+   * Handles grid size select change.
+   * 
+   * @param evt - the change event from the <select> element
+   */
+  const handleGridSizeChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const newGridSize = Number(evt.target.value);
+    if (isValidOption(newGridSize, GRID_SIZES)) {
+      setSettings({...settings, gridSize: newGridSize});
+    }
+  }
+
+  /**
+   * Handles game mode select change.
+   * 
+   * @param evt - the change event from the <select> element
+   */
+  const handleModeChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const newGameMode = evt.target.value;
+    if (isValidOption(newGameMode, GAME_MODES)) {
+      setSettings({...settings, gameMode: newGameMode})
+    }
+  }
+
+  /**
+   * Handles opponent change.
+   * 
+   * @param evt - the change event from the <select> element
+   */
+  const handleOpponentChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
+    const newOpponent = evt.target.value;
+    if (isValidOption(newOpponent, OPPONENTS)) {
+      setSettings({...settings, opponent: newOpponent});
+    }
+  }
+
   return (
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
@@ -102,6 +145,11 @@ export default function App() {
                 isUndoDisabled={currentMove === 0}
                 isRedoDisabled={currentMove === history.length - 1}
                 isResetDisabled={history.length === 1 && currentMove === 0}/>
+      <Settings gameStarted={hasGameStarted}
+                gameSettings={settings} 
+                onChangeGridSize={handleGridSizeChange}
+                onChangeMode={handleModeChange}
+                onChangeOpponent={handleOpponentChange}/>
     </div>
   );
 }
