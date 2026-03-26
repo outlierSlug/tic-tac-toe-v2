@@ -33,7 +33,16 @@ npm run dev
 ![Browser View](assets/preview.png)
 
 ## Gameplay
-Currently, this project only supports two player local gameplay. Click on a square to place your token and get three in a row to win!
+Get three in a row to win!
+
+Modify gameplay settings with the select options in "Settings". Play locally against a friend or yourself, or play against the computer!
+
+To play against the computer, just click a square to start the game as "X". The game will automatically start if you choose to play as "O".
+
+## Special Features
+Mode: Endless
+
+Players may only have up to 3 tokens at the board at a time. When a player is about to play a 4th token, the earliest token they placed will be removed.
 
 ## License
 This project is licensed under the [MIT License](https://mit-license.org/). Feel free to use, modify, and redistribute.
