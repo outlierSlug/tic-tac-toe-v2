@@ -12,13 +12,16 @@ import { calculateWinner, isValidOption } from "./utils";
 
 import "./App.css";
 
+const DEFAULT_SETTINGS: GameSettings = { gridSize: 3, gameMode: "classic", opponent: "local"};
+const DEFAULT_HISTORY: GameBoard[] = [Array(DEFAULT_SETTINGS.gridSize * DEFAULT_SETTINGS.gridSize).fill(null)];
+
 export default function App() {
   // State to track the history of moves (an array of GameBoards) and the current move index
   const [currentMove, setCurrentMove] = useState(0);
-  const [history, setHistory] = useState<GameBoard[]>([Array(9).fill(null)]);
+  const [history, setHistory] = useState<GameBoard[]>(DEFAULT_HISTORY);
 
   // Game settings, configurable before the game starts.
-  const [settings, setSettings] = useState<GameSettings>({gridSize: 3, gameMode: "classic", opponent: "local"});
+  const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
 
   // Determine the current turn and game state.
   const xIsNext: boolean = currentMove % 2 === 0;
@@ -93,8 +96,9 @@ export default function App() {
    * Clears all history and sets currentMove back to 0.
    */
   const handleReset = (): void => {
-    saveGameState([Array(9).fill(null)], 0);
-    setHistory([Array(9).fill(null)]);
+    const newHistory: GameBoard[] = [Array(settings.gridSize * settings.gridSize).fill(null)];
+    saveGameState(newHistory, 0);
+    setHistory(newHistory);
     setCurrentMove(0);
   }
 
@@ -134,6 +138,13 @@ export default function App() {
     }
   }
 
+  /**
+   * Handles button click that restores settings to default.
+   */
+  const handleRestoreDefaults = (): void => {
+    setSettings(DEFAULT_SETTINGS);
+  }
+
   return (
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
@@ -149,7 +160,8 @@ export default function App() {
                 gameSettings={settings} 
                 onChangeGridSize={handleGridSizeChange}
                 onChangeMode={handleModeChange}
-                onChangeOpponent={handleOpponentChange}/>
+                onChangeOpponent={handleOpponentChange}
+                onRestoreDefaults={handleRestoreDefaults}/>
     </div>
   );
 }

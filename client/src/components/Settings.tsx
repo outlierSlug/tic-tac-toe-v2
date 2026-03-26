@@ -5,11 +5,12 @@ type SettingsProps = {
   gameSettings: GameSettings,
   onChangeGridSize: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
   onChangeMode: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
-  onChangeOpponent: (evt: React.ChangeEvent<HTMLSelectElement>) => void
+  onChangeOpponent: (evt: React.ChangeEvent<HTMLSelectElement>) => void,
+  onRestoreDefaults: () => void
 };
 
 export default function Settings(props: SettingsProps) {
-  const { gameStarted, gameSettings, onChangeGridSize, onChangeMode, onChangeOpponent } = props;
+  const { gameStarted, gameSettings, onChangeGridSize, onChangeMode, onChangeOpponent, onRestoreDefaults } = props;
   return (
     <div className="settings-bar">
       <h2>Settings</h2>
@@ -41,6 +42,12 @@ export default function Settings(props: SettingsProps) {
         <option value="local">Local</option>
         <option value="computer">Computer</option>
       </select>
+      <br></br>
+      <br></br>
+      {/* Restore Defaults Button*/}
+      <button onClick={onRestoreDefaults} disabled={gameStarted}>
+        Restore Defaults
+      </button>
     </div>
   );
 }
