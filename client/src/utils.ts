@@ -61,7 +61,12 @@ export const calculateWinner = (board: GameBoard): GameResult => {
 }
 
 /**
- * Get the index (0-8) of the square that will be removed on this move in endless mode.
+ * Get the index of the square that will be removed from the board on this move (in endless mode).
+ * 
+ * Endless Mode Invariant: 
+ * Each move changes exactly one square, and tokens expire exactly 6 moves after they are placed.
+ * The token that must be removed on currentMove is the placement that occurred on currentMove - 6, which 
+ * can be uniquely identified by a null -> Player diff from history[currentMove - 6] and history[currentMove - 5].
  * 
  * @param history - the full game history
  * @param currentMove - the current move index

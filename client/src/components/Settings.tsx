@@ -45,7 +45,9 @@ export default function Settings(props: SettingsProps) {
       <br></br>
       <br></br>
       {/* Restore Defaults Button*/}
-      <button onClick={onRestoreDefaults} disabled={gameStarted}>
+      <button onClick={onRestoreDefaults} 
+              title={"Restore settings to default"} 
+              disabled={gameStarted}>
         Restore Defaults
       </button>
     </div>
