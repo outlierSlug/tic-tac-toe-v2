@@ -10,6 +10,13 @@ type SafeResponse = Response;
 // currentMove: index into history (pointer to that board position)
 const gameState = {history: [Array(9).fill(null)], currentMove: 0};
 
+// In-memory storage for the current settings. 
+const gameSettings = {gridSize: 3, gameMode: "classic", opponent: "local"};
+
+const VALID_GRID_SIZES = [3, 4, 5];
+const VALID_GAME_MODES = ["classic", "endless"];
+const VALID_OPPONENTS = ["local", "computer"];
+
 /**
  * GET /game
  * Returns the current game state as JSON. 
@@ -42,4 +49,35 @@ export const setGameState = (req: SafeRequest, res: SafeResponse): void => {
   gameState.history = history;
   gameState.currentMove = currentMove;
   res.status(200).send("OK");
+}
+
+// GET /settings
+export const getSettings = (_req: SafeRequest, res: SafeResponse): void => {
+  res.json(gameSettings);
+}
+
+
+// POST /settings
+export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
+  const { gridSize, gameMode, opponent } = req.body;
+
+  if (typeof gridSize !== "number" || !VALID_GRID_SIZES.includes(gridSize)) {
+    res.status(400).send("Invalid gridSize");
+    return;
+  }
+
+  if (typeof gameMode !== "string" || !VALID_GAME_MODES.includes(gameMode)) {
+    res.status(400).send("Invalid gameMode");
+    return;
+  }
+
+  if (typeof opponent !== "string" || !VALID_OPPONENTS.includes(opponent)) {
+    res.status(400).send("Invalid opponent");
+    return;
+  }
+
+  gameSettings.gridSize = gridSize;
+  gameSettings.gameMode = gameMode;
+  gameSettings.opponent = opponent;
+  res.status(200).send("Settings saved successfully");
 }
