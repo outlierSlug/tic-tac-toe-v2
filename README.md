@@ -37,7 +37,7 @@ Get three in a row to win!
 
 Modify gameplay settings with the select options in "Settings". Play locally against a friend or yourself, or play against the computer!
 
-To play against the computer, just click a square to start the game as "X". The game will automatically start if you choose to play as "O".
+To play against the computer select "Opponent: Computer" and just click a square to start the game as "X". The game will automatically start if you choose to play as "O".
 
 ## Special Features
 Mode: Endless
