@@ -75,12 +75,25 @@ const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) =>
 }
 
 // GET /settings
+/**
+ * Fetches the current game settings from the /settings endpoint on mount.
+ * On success, updates the client settings state.
+ * 
+ * @param setSettings 
+ */
 export const getSettings = (setSettings: (settings: GameSettings) => void): void => {
   fetch("http://localhost:8080/settings")
     .then((res) => doGetSettingsResp(res, setSettings))
     .catch(doGetError)
 }
 
+/**
+ * Handles the HTTP response from GET /settings.
+ * Routes to JSON parsing on 200 OK, or error handling otherwise.
+ * 
+ * @param res - the HTTP response from the server
+ * @param setSettings - React state setter function for settings
+ */
 const doGetSettingsResp = (res: Response, setSettings: (settings: GameSettings) => void): void => {
   if (res.status === 200) {
     res.json()
@@ -95,6 +108,14 @@ const doGetSettingsResp = (res: Response, setSettings: (settings: GameSettings) 
   }
 }
 
+/**
+ * Validates and processes the JSON response from GET /settings.
+ * The JSON response must contain a valid GameSettings object with valid fields.
+ * 
+ * @param data - the the parsed JSON response from the server
+ * @param setSettings - React state setter function for settings
+ * @returns 
+ */
 const doGetSettingsJson = (data: unknown, setSettings: (settings: GameSettings) => void): void => {
   if (!isRecord(data)) {
     doGetError(`Data is not a record: ${typeof data}`);
@@ -116,6 +137,7 @@ const doGetSettingsJson = (data: unknown, setSettings: (settings: GameSettings) 
     return;
   }
 
+  // Update client state
   setSettings({gridSize: data.gridSize, gameMode: data.gameMode, opponent: data.opponent});
 }
 
