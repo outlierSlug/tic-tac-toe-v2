@@ -74,7 +74,6 @@ const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) =>
   setCurrentMove(data.currentMove);
 }
 
-// GET /settings
 /**
  * Fetches the current game settings from the /settings endpoint on mount.
  * On success, updates the client settings state.

@@ -59,3 +59,41 @@ export const calculateWinner = (board: GameBoard): GameResult => {
   // Otherwise, there is no winner yet. Game is still in progress.
   return { winner: null, winningSquares: []};
 }
+
+/**
+ * Get the index (0-8) of the square that will be removed on this move in endless mode.
+ * 
+ * @param history - the full game history
+ * @param currentMove - the current move index
+ * @returns the index of the expering square, or null if no removal yet
+ */
+export const getExpiringSquare = (history: GameBoard[], currentMove: number): number | null => {
+  // The first possible expiring square on a 3x3 grid is on turn 7 (X's fourth move, currentMove = 6).
+  if (currentMove < 6) {
+    return null;
+  }
+
+  // Find where the current player's oldest token was placed. 
+  // The difference between the history board 6 indices ago and 5 indices ago was 
+  // the oldest move played by the current player.
+  const index = currentMove - 6;
+  const prev = history[index];
+  const curr = history[index + 1];
+
+  // Find the index where the previous board had null and the current board has a token.
+  // This was the index of the move that was played on that turn.
+  return curr.findIndex((cell, i) => prev[i] === null && cell !== prev[i]);
+}
+
+/**
+ * Removes the expering square from the board in endless mode.
+ * Mutates the board in place. NEVER call this on state directly, call on a copy.
+ * 
+ * @param currentSquares 
+ * @param expiringSquare 
+ */
+export const removeExpiringSquare = (currentSquares: GameBoard, expiringSquare: number | null) => {
+  if (expiringSquare !== null) {
+    currentSquares[expiringSquare] = null;
+  }
+}

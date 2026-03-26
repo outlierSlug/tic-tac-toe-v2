@@ -51,6 +51,10 @@
   transition: box-shadow 0.3s, border 0.3s;
 }
 
+.square.expiring {
+  background: #ccc;
+}
+
 /* X and O markers */
 .x-marker {
   color: blue; /* Blue for X */

@@ -8,7 +8,7 @@ import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 
 import { getGameState, saveGameState, getSettings, saveSettings } from "./api";
-import { calculateWinner, isValidOption } from "./utils";
+import { calculateWinner, getExpiringSquare, isValidOption, removeExpiringSquare } from "./utils";
 
 import "./App.css";
 
@@ -31,6 +31,10 @@ export default function App() {
   const gameResult: GameResult = calculateWinner(currentSquares);
   const winner = gameResult.winner;
   const winningSquares = gameResult.winningSquares;
+
+  // Check for an expiring square (only for endless mode).
+  const expiringSquare: number | null = 
+    settings.gameMode === "endless" ? getExpiringSquare(history, currentMove) : null;
 
   // Checks if the game has started. Settings are locked once a game begins.
   const hasGameStarted = currentMove > 0 || history.length > 1;
@@ -59,6 +63,11 @@ export default function App() {
       nextSquares[index]= "X";
     } else {
       nextSquares[index] = "O";
+    }
+
+    // In endless mode, remove the current player's oldest token.
+    if (settings.gameMode === "endless") {
+      removeExpiringSquare(nextSquares, expiringSquare);
     }
 
     // Update the history of moves and move index.
@@ -156,7 +165,10 @@ export default function App() {
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
       <Status xIsNext={xIsNext} winner={winner} />
-      <Board board={currentSquares} onClick={handleClick} winningSquares={winningSquares}/>
+      <Board board={currentSquares} 
+             onClick={handleClick} 
+             winningSquares={winningSquares}
+             expiringSquare={expiringSquare}/>
       <Controls onUndo={handleUndo}
                 onRedo={handleRedo}
                 onReset={handleReset}

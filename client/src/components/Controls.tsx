@@ -1,10 +1,10 @@
 type ControlsProps = {
-  onUndo: () => void;
-  onRedo: () => void;
-  onReset: () => void;
-  isUndoDisabled: boolean;
-  isRedoDisabled: boolean;
-  isResetDisabled: boolean;
+  onUndo: () => void,
+  onRedo: () => void,
+  onReset: () => void,
+  isUndoDisabled: boolean,
+  isRedoDisabled: boolean,
+  isResetDisabled: boolean
 };
 
 export default function Controls(props: ControlsProps) {
