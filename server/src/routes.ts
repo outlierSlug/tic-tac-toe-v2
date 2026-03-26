@@ -56,7 +56,6 @@ export const getSettings = (_req: SafeRequest, res: SafeResponse): void => {
   res.json(gameSettings);
 }
 
-
 // POST /settings
 export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
   const { gridSize, gameMode, opponent } = req.body;

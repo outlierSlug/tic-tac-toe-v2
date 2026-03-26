@@ -7,7 +7,7 @@ import Status from "./components/Status";
 import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 
-import { getGameState, saveGameState } from "./api";
+import { getGameState, saveGameState, getSettings, saveSettings } from "./api";
 import { calculateWinner, isValidOption } from "./utils";
 
 import "./App.css";
@@ -35,8 +35,11 @@ export default function App() {
   // Checks if the game has started. Settings are locked once a game begins.
   const hasGameStarted = currentMove > 0 || history.length > 1;
 
-  // GET current game state on mount
-  useEffect(() => {getGameState(setHistory, setCurrentMove)}, []);
+  // GET current game state and settings on mount
+  useEffect(() => {
+    getGameState(setHistory, setCurrentMove); 
+    getSettings(setSettings)
+  }, []);
 
   /**
    * Handles a game square (cell) clicked on by a player.
@@ -110,6 +113,7 @@ export default function App() {
   const handleGridSizeChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const newGridSize = Number(evt.target.value);
     if (isValidOption(newGridSize, GRID_SIZES)) {
+      saveSettings({...settings, gridSize: newGridSize});
       setSettings({...settings, gridSize: newGridSize});
     }
   }
@@ -122,7 +126,8 @@ export default function App() {
   const handleModeChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const newGameMode = evt.target.value;
     if (isValidOption(newGameMode, GAME_MODES)) {
-      setSettings({...settings, gameMode: newGameMode})
+      saveSettings({...settings, gameMode: newGameMode});
+      setSettings({...settings, gameMode: newGameMode});
     }
   }
 
@@ -134,6 +139,7 @@ export default function App() {
   const handleOpponentChange = (evt: React.ChangeEvent<HTMLSelectElement>): void => {
     const newOpponent = evt.target.value;
     if (isValidOption(newOpponent, OPPONENTS)) {
+      saveSettings({...settings, opponent: newOpponent});
       setSettings({...settings, opponent: newOpponent});
     }
   }
@@ -142,6 +148,7 @@ export default function App() {
    * Handles button click that restores settings to default.
    */
   const handleRestoreDefaults = (): void => {
+    saveSettings(DEFAULT_SETTINGS);
     setSettings(DEFAULT_SETTINGS);
   }
 

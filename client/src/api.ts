@@ -1,7 +1,7 @@
-import type { GameBoard } from "./types";
-import { isRecord } from "./utils";
+import { GAME_MODES, GRID_SIZES, OPPONENTS, type GameBoard, type GameSettings } from "./types";
+import { isRecord, isValidOption } from "./utils";
 
-// GET /game
+// GET methods
 
 /**
  * Fetches the current game state from the /game endpoint on mount.
@@ -12,7 +12,7 @@ import { isRecord } from "./utils";
  */
 export const getGameState = (setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
   fetch("http://localhost:8080/game")
-    .then((res) => doGetResp(res, setHistory, setCurrentMove))
+    .then((res) => doGetGameStateResp(res, setHistory, setCurrentMove))
     .catch(doGetError);
 }
 
@@ -24,10 +24,10 @@ export const getGameState = (setHistory: (history: GameBoard[]) => void, setCurr
  * @param setHistory - React state setter function for game history
  * @param setCurrentMove - React state setter function for current move index
  */
-const doGetResp = (res: Response, setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
+const doGetGameStateResp = (res: Response, setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
   if (res.status === 200) {
     res.json()
-      .then((data) => doGetJson(data, setHistory, setCurrentMove))
+      .then((data) => doGetGameStateJson(data, setHistory, setCurrentMove))
       .catch(doGetError);
   } else if (res.status === 400) {
     res.text()
@@ -47,7 +47,7 @@ const doGetResp = (res: Response, setHistory: (history: GameBoard[]) => void, se
  * @param setCurrentMove - React state setter function for current move index
  * @returns
  */
-const doGetJson = (data: unknown, setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
+const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
   if (!isRecord(data)) {
     doGetError(`Data is not a record: ${typeof data}`);
     return;
@@ -74,16 +74,61 @@ const doGetJson = (data: unknown, setHistory: (history: GameBoard[]) => void, se
   setCurrentMove(data.currentMove);
 }
 
+// GET /settings
+export const getSettings = (setSettings: (settings: GameSettings) => void): void => {
+  fetch("http://localhost:8080/settings")
+    .then((res) => doGetSettingsResp(res, setSettings))
+    .catch(doGetError)
+}
+
+const doGetSettingsResp = (res: Response, setSettings: (settings: GameSettings) => void): void => {
+  if (res.status === 200) {
+    res.json()
+      .then((data) => doGetSettingsJson(data, setSettings))
+      .catch(doGetError);
+  } else if (res.status === 400) {
+    res.text()
+      .then(doGetError)
+      .catch(doGetError);
+  } else {
+    doGetError(`Unexpected response status: ${res.status}`);
+  }
+}
+
+const doGetSettingsJson = (data: unknown, setSettings: (settings: GameSettings) => void): void => {
+  if (!isRecord(data)) {
+    doGetError(`Data is not a record: ${typeof data}`);
+    return;
+  }
+
+  if (!isValidOption(data.gridSize, GRID_SIZES)) {
+    doGetError(`data.gridSize is not valid: ${data.gridSize}`);
+    return;
+  }
+
+  if (!isValidOption(data.gameMode, GAME_MODES)) {
+    doGetError(`data.gameMode is not valid: ${data.gameMode}`);
+    return;
+  }
+
+  if (!isValidOption(data.opponent, OPPONENTS)) {
+    doGetError(`data.opponent is not valid: ${data.opponent}`);
+    return;
+  }
+
+  setSettings({gridSize: data.gridSize, gameMode: data.gameMode, opponent: data.opponent});
+}
+
 /**
- * Logs an errors that occur during the GET /game fetch process.
+ * Logs an errors that occur during the GET fetch process.
  *
  * @param err - the error that occurred
  */
 const doGetError = (err: unknown): void => {
-  console.error("Error fetching '/game', ", err);
+  console.error("Error during GET request: ", err);
 }
 
-// POST /game
+// POST methods
 
 /**
  * Saves the current game state to the server via POST request to the /game endpoint.
@@ -102,8 +147,19 @@ export const saveGameState = (history: GameBoard[], currentMove: number): void =
   .catch(doSaveError);
 }
 
+// POST /settings
+export const saveSettings = (gameSettings: GameSettings): void => {
+  fetch("http://localhost:8080/settings", {
+      method: "POST",
+      body: JSON.stringify(gameSettings),
+      headers: {"Content-Type": "application/json"}
+  })
+  .then(doSaveResp)
+  .catch(doSaveError);
+}
+
 /**
- * Handles the HTTP response from POST /game.
+ * Handles the HTTP response from a POST request.
  *
  * @param res - the HTTP response from the server
  */
@@ -116,10 +172,10 @@ const doSaveResp = (res: Response) => {
 }
 
 /**
- * Logs an errors that occur during the POST /game fetch process.
+ * Logs an errors that occur during the POST fetch process.
  *
  * @param err - the error that occurred
  */
 const doSaveError = (err: unknown): void => {
-  console.error("Error saving to /game: ", err);
+  console.error("Error during POST request: ", err);
 }
