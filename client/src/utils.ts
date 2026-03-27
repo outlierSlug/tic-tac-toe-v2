@@ -127,3 +127,19 @@ export const getRandomSquare = (board: GameBoard): number | null  => {
   const randomIndex = Math.floor(Math.random() * emptyIndices.length);
   return emptyIndices[randomIndex];
 }
+
+/**
+ * Determines if it is the human player's turn at a given move index
+ * when facing the computer.
+ * 
+ * @param move - the move index to check
+ * @param playerSide - the side the human is playing as
+ * @returns true if it is the human's turn at the given move index
+ */
+export const isHumanTurn = (move: number, playerSide: Player): boolean => {
+    if (playerSide === "X"){
+      return move % 2 === 0;
+    } else {
+      return move % 2 === 1;
+    }
+  }

@@ -8,12 +8,14 @@ import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 
 import { getGameState, saveGameState, getSettings, saveSettings } from "./api";
-import { calculateWinner, getExpiringSquare, getRandomSquare, isValidOption, removeExpiringSquare } from "./utils";
+import { calculateWinner, getExpiringSquare, getRandomSquare, isHumanTurn, isValidOption, removeExpiringSquare } from "./utils";
 
 import "./App.css";
 
+// Global constants
 const DEFAULT_SETTINGS: GameSettings = { gridSize: 3, gameMode: "classic", opponent: "local", player: "X", difficulty: "easy"};
 const DEFAULT_HISTORY: GameBoard[] = [Array(DEFAULT_SETTINGS.gridSize * DEFAULT_SETTINGS.gridSize).fill(null)];
+const COMPUTER_MOVE_DELAY_MS = 1000;
 
 export default function App() {
   // State to track the history of moves (an array of GameBoards) and the current move index
@@ -25,18 +27,11 @@ export default function App() {
 
   // Flag for computer move delay
   const [isComputerThinking, setIsComputerThinking] = useState(false);
+  const computerToken: Player = settings.player === "X" ? "O" : "X";
 
   // Determine the current turn and game state.
   const xIsNext: boolean = currentMove % 2 === 0;
   const currentSquares: GameBoard = history[currentMove];
-
-  const isHumanTurn = (move: number): boolean => {
-    if (settings.player === "X"){
-      return move % 2 === 0;
-    } else {
-      return move % 2 === 1;
-    }
-  }
 
   // Check for a potential winner and the winning squares.
   const gameResult: GameResult = calculateWinner(currentSquares);
@@ -58,49 +53,19 @@ export default function App() {
   }, []);
 
   /**
-   * Handles a game square (cell) clicked on by a player.
-   * Ignores clicks on already-filled squares, if the computer is moving, or after the game has ended.
-   * Updates server and client state on click.
-   *
-   * @param index - the index of the clicked square
+   * Triggers a computer move after a delay. Sets isComputerThinking to true while the computer is "thinking",
+   * then calls doComputerMove after COMPUTER_MOVE_DELAY_MS milliseconds.
+   * 
+   * @param currentHistory - the current game history to pass to the computer
+   * @param currentMoveIndex - the current move index to pass to the computer
+   * @param token - the computer's token
    */
-  const handleClick = (index: number): void => {
-    if (currentSquares[index] || winner || isComputerThinking) {
-      return;
-    }
-
-    // Set the square to the the current player's token.
-    const nextSquares: GameBoard = currentSquares.slice();
-    if (xIsNext) {
-      nextSquares[index]= "X";
-    } else {
-      nextSquares[index] = "O";
-    }
-
-    // In endless mode, remove the current player's oldest token.
-    if (settings.gameMode === "endless") {
-      removeExpiringSquare(nextSquares, expiringSquare);
-    }
-
-    // Update the history of moves and move index.
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-
-    // Update server state
-    saveGameState(nextHistory, nextHistory.length - 1);
-
-    // Update local state
-    setHistory(nextHistory);
-    setCurrentMove(nextHistory.length - 1);
-
-    // If playing against computer, trigger computer move
-    if (settings.opponent === "computer" && !calculateWinner(nextSquares).winner) {
-      setIsComputerThinking(true);
-      const computerToken = settings.player === "X" ? "O" : "X";
-      setTimeout(() => {
-        doComputerMove(nextHistory, nextHistory.length - 1, computerToken);
-        setIsComputerThinking(false);
-      }, 1000);
-    }
+  const handleComputerMove = (currentHistory: GameBoard[], currentMoveIndex: number, token: Player): void => {
+    setIsComputerThinking(true);
+    setTimeout(() => {
+      doComputerMove(currentHistory, currentMoveIndex, token);
+      setIsComputerThinking(false);
+    }, COMPUTER_MOVE_DELAY_MS);
   }
 
   /**
@@ -139,6 +104,47 @@ export default function App() {
   }
 
   /**
+   * Handles a game square (cell) clicked on by a player.
+   * Ignores clicks on already-filled squares, if the computer is moving, or after the game has ended.
+   * Updates server and client state on click.
+   *
+   * @param index - the index of the clicked square
+   */
+  const handleClick = (index: number): void => {
+    if (currentSquares[index] || winner || isComputerThinking) {
+      return;
+    }
+
+    // Set the square to the the current player's token.
+    const nextSquares: GameBoard = currentSquares.slice();
+    if (xIsNext) {
+      nextSquares[index]= "X";
+    } else {
+      nextSquares[index] = "O";
+    }
+
+    // In endless mode, remove the current player's oldest token.
+    if (settings.gameMode === "endless") {
+      removeExpiringSquare(nextSquares, expiringSquare);
+    }
+
+    // Update the history of moves and move index.
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+
+    // Update server state
+    saveGameState(nextHistory, nextHistory.length - 1);
+
+    // Update local state
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+
+    // If playing against computer, trigger computer move
+    if (settings.opponent === "computer" && !calculateWinner(nextSquares).winner) {
+      handleComputerMove(nextHistory, nextHistory.length - 1, computerToken);
+    }
+  }
+
+  /**
    * Handles undo button click.
    * Moves currentMove pointer one index back in history during local play.
    * Moves currentMove pointer back to the latest user move when playing against the computer.
@@ -149,7 +155,7 @@ export default function App() {
       let newMove: number;
       if (settings.opponent === "computer") {
         newMove = currentMove - 1;
-        while (!isHumanTurn(newMove) && newMove > 0) {
+        while (!isHumanTurn(newMove, settings.player) && newMove > 0) {
           if (calculateWinner(history[newMove]).winner) {
             break;
           }
@@ -158,11 +164,7 @@ export default function App() {
 
         // If we landed on move 0 and human is O, trigger computer first move again
         if (newMove === 0 && settings.player === "O") {
-          setIsComputerThinking(true);
-          setTimeout(() => {
-            doComputerMove(history, 0, "X");
-            setIsComputerThinking(false);
-          }, 1000);
+          handleComputerMove(history, 0, "X");
         }
       } else {
         newMove = currentMove - 1;
@@ -182,7 +184,7 @@ export default function App() {
       let newMove: number;
       if (settings.opponent === "computer") {
         newMove = currentMove + 1;
-        while (!isHumanTurn(newMove) && newMove < history.length - 1) {
+        while (!isHumanTurn(newMove, settings.player) && newMove < history.length - 1) {
           if (calculateWinner(history[newMove]).winner) {
             break;
           }
@@ -262,11 +264,7 @@ export default function App() {
       setSettings({...settings, player: newPlayer});
 
       if (newPlayer === "O") {
-        setIsComputerThinking(true);
-        setTimeout(() => {
-          doComputerMove(history, currentMove, "X");
-          setIsComputerThinking(false);
-        }, 1000)
+        handleComputerMove(history, currentMove, "X");
       }
     }
   }
