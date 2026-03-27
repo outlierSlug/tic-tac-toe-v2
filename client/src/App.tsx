@@ -48,7 +48,8 @@ export default function App() {
     settings.gameMode === "endless" ? getExpiringSquare(history, currentMove) : null;
 
   // Checks if the game has started. Settings are locked once a game begins.
-  const hasGameStarted = currentMove > 0 || history.length > 1;
+  const hasGameStarted: boolean = 
+    currentMove > 0 || history.length > 1 || (settings.opponent === "computer" && settings.player === "O");
 
   // GET current game state and settings on mount
   useEffect(() => {
