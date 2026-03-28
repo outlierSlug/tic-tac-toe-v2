@@ -1,6 +1,8 @@
 import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameSettings } from "./types";
 import { isRecord, isValidOption } from "./utils";
 
+const API_URL = import.meta.env.VITE_API_URL as string;
+
 // GET methods
 
 /**
@@ -11,7 +13,7 @@ import { isRecord, isValidOption } from "./utils";
  * @param setCurrentMove - React state setter function for current move index
  */
 export const getGameState = (setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
-  fetch("http://localhost:8080/game")
+  fetch(`${API_URL}/game`)
     .then((res) => doGetGameStateResp(res, setHistory, setCurrentMove))
     .catch(doGetError);
 }
@@ -81,7 +83,7 @@ const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) =>
  * @param setSettings 
  */
 export const getSettings = (setSettings: (settings: GameSettings) => void): void => {
-  fetch("http://localhost:8080/settings")
+  fetch(`${API_URL}/settings`)
     .then((res) => doGetSettingsResp(res, setSettings))
     .catch(doGetError)
 }
@@ -169,7 +171,7 @@ const doGetError = (err: unknown): void => {
  * @param currentMove - the current move index t to persist
  */
 export const saveGameState = (history: GameBoard[], currentMove: number): void => {
-  fetch("http://localhost:8080/game", {
+  fetch(`${API_URL}/game`, {
       method: "POST",
       body: JSON.stringify({history, currentMove}),
       headers: {"Content-Type": "application/json"}
@@ -180,7 +182,7 @@ export const saveGameState = (history: GameBoard[], currentMove: number): void =
 
 // POST /settings
 export const saveSettings = (gameSettings: GameSettings): void => {
-  fetch("http://localhost:8080/settings", {
+  fetch(`${API_URL}/settings`, {
       method: "POST",
       body: JSON.stringify(gameSettings),
       headers: {"Content-Type": "application/json"}
