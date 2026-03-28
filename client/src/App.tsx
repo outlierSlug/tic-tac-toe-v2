@@ -52,6 +52,20 @@ export default function App() {
     getSettings(setSettings)
   }, []);
 
+  // BUGFIX: Handle refreshes during a computer move. On refresh, will trigger the computer move again if it was interrupted.
+  useEffect(() => {
+    if (
+      settings.opponent === "computer" &&
+      !isHumanTurn(currentMove, settings.player) &&
+      !calculateWinner(currentSquares).winner &&
+      !isComputerThinking &&
+      hasGameStarted
+    ) {
+      const token: Player = settings.player === "X" ? "O" : "X";
+      handleComputerMove(history, currentMove, token);
+    }
+  }, [history, currentMove, settings]);
+
   /**
    * Triggers a computer move after a delay. Sets isComputerThinking to true while the computer is "thinking",
    * then calls doComputerMove after COMPUTER_MOVE_DELAY_MS milliseconds.
