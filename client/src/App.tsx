@@ -8,7 +8,7 @@ import Controls from "./components/Controls";
 import Settings from "./components/Settings";
 
 import { getGameState, saveGameState, getSettings, saveSettings } from "./api";
-import { calculateWinner, getExpiringSquare, getRandomSquare, isHumanTurn, isValidOption, removeExpiringSquare } from "./utils";
+import { calculateWinner, getExpiringSquare, getMiniMaxMove, getRandomSquare, isHumanTurn, isValidOption, removeExpiringSquare } from "./utils";
 
 import "./App.css";
 
@@ -74,16 +74,18 @@ export default function App() {
    * @param currentHistory - the current state of history
    * @param currentMoveIndex - the current move index
    * @param computerToken - the opposite of the player token
-   * @returns 
    */
   const doComputerMove = (currentHistory: GameBoard[], currentMoveIndex: number, computerToken: Player): void => {
-    const board = currentHistory[currentMoveIndex];
+    const board = [...currentHistory[currentMoveIndex]];
 
     if (calculateWinner(board).winner) {
       return;
     }
 
-    const computerIndex = getRandomSquare(board);
+    // Get index based on difficulty (hard -> minimax, easy -> random)
+    const computerIndex = settings.difficulty === "hard" 
+      ? getMiniMaxMove(board, computerToken, settings.player)
+      : getRandomSquare(board);
 
     if (computerIndex === null) {
       return;

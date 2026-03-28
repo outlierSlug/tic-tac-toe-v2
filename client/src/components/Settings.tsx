@@ -54,7 +54,7 @@ export default function Settings(props: SettingsProps) {
                   onChange={onChangeDifficulty}
                   disabled={gameStarted}>
             <option value="easy">Easy</option>
-            {/*<option value="hard" disabled>Hard</option>*/}
+            <option value="hard">Hard</option>
           </select>
           <br></br>
           <label htmlFor="player-select">Play As: </label>

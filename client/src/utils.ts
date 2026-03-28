@@ -142,4 +142,104 @@ export const isHumanTurn = (move: number, playerSide: Player): boolean => {
     } else {
       return move % 2 === 1;
     }
+}
+
+/**
+ * Gets the best index available for the computer using the minimax algorithm.
+ * 
+ * @param board - the current state of the game board, passed as a copy
+ * @param computerToken - the token of the computer player (X or O)
+ * @param humanToken - the token of the human player (X or O)
+ * @param simulatedHistory - 
+ * @param isEndless -
+ * @returns the index in the current board that is the best possible move for the computer
+ */
+export const getMiniMaxMove = (board: GameBoard, computerToken: Player, humanToken: Player) : number => {
+  let bestScore = -Infinity;
+  let bestIndex = -1;
+
+  // Shuffle indices to randomize among equally scored moves
+  const indices = shuffleIndices(board.length);
+
+  for (const i of indices) {
+    if (board[i] === null) {
+      board[i] = computerToken;  // try this move
+      const score = minimax(board, false, computerToken, humanToken);  // calculate minimax score starting from the next human turn
+      board[i] = null;  // undo
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
   }
+
+  return bestIndex;
+}
+
+/**
+ * Minimax algorithm.
+ * 
+ * @param board - current game board
+ * @param isComputerTurn - if false, simulates the human's possible moves at this point in the game
+ * @param computerToken - the token of the computer player (X or O)
+ * @param humanToken - the token of the human player (X or O)
+ */
+const minimax = (board: GameBoard, isComputerTurn: boolean, computerToken: Player, humanToken: Player): number => {
+  // Base cases: game is over
+  const result = calculateWinner(board);
+  if (result.winner === computerToken) {
+    return 1;  // computer wins
+  }
+
+  if (result.winner === humanToken) {
+    return -1;  // human wins
+  }
+
+  if (result.winner === "Draw") {
+    return 0;
+  }
+
+  if (board.every((cell) => cell !== null)) {
+    return 0;  // Board is full
+  }
+
+  // Recurse down game tree based on whose turn it is. We want to maximize on isComputerTurn and minimize if human turn.
+  if (isComputerTurn) {
+    let bestScore = -Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        board[i] = computerToken;  // try this move
+        const score = minimax(board, false, computerToken, humanToken);
+        board[i] = null;  // undo
+        bestScore = Math.max(bestScore, score);
+      }
+    }
+    return bestScore;
+  } else {
+    let bestScore = Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        board[i] = humanToken;  // try this move
+        const score = minimax(board, true, computerToken, humanToken);
+        board[i] = null;  // undo
+        bestScore = Math.min(bestScore, score);
+      }
+    }
+    return bestScore;
+  }
+}
+
+/**
+ * Fisher-Yates shuffle algorithm.
+ * 
+ * @param length 
+ * @returns 
+ */
+const shuffleIndices = (length: number): number[] => {
+  const indices = [...Array(length).keys()];
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices;
+};
