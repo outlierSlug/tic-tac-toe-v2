@@ -7,7 +7,7 @@ const app: Express = express();
 
 const ALLOWED_ORIGINS: string[] = [
   "http://localhost:5173", 
-  "https://tic-tac-toe-v2-pink.vercel.app/",
+  "https://tic-tac-toe-v2-pink.vercel.app",
   "https://tic-tac-toe-v2-outlierslugs-projects.vercel.app"
 ];
 
