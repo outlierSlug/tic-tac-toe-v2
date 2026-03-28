@@ -2,6 +2,8 @@
 
 A full stack tic-tac-toe game built with React, Typescript, and Express.
 
+[Play it right here!](https://tic-tac-toe-v2-pink.vercel.app)
+
 ## Prerequisites
 - Node.js (v18+)
 - npm
@@ -14,20 +16,25 @@ git clone https://github.com/outlierSlug/tic-tac-toe-v2.git
 cd tic-tac-toe-v2
 ```
 
-2. Install and run the client (http://localhost:5173):
+2. Before running the client, create `client/env.local`:
+```
+VITE_API_URL=http://localhost:8080
+```
+
+3. Install and run the client (http://localhost:5173):
 ```bash
 cd client
 npm install --no-audit
 npm run dev
 ```
 
-3. Install and run the server (http://localhost:8080) in a second terminal:
+4. Install and run the server (http://localhost:8080) in a second terminal:
 ```bash
 cd server
 npm install --no-audit
 npm run dev
 ```
-4. To stop the client or server, press `Ctrl + C` in the respective terminal.
+5. To stop the client or server, press `Ctrl + C` in the respective terminal.
 
 ## Preview
 ![Browser View](assets/preview.png)
