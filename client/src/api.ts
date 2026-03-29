@@ -1,7 +1,8 @@
 import { AI_LEVELS, GAME_MODES, GRID_SIZES, OPPONENTS, PLAYERS, type GameBoard, type GameSettings } from "./types";
-import { isRecord, isValidOption } from "./utils";
+import { getSessionId, isRecord, isValidOption } from "./utils";
 
 const API_URL = import.meta.env.VITE_API_URL as string;
+const SESSION_ID = getSessionId();
 
 // GET methods
 
@@ -13,7 +14,9 @@ const API_URL = import.meta.env.VITE_API_URL as string;
  * @param setCurrentMove - React state setter function for current move index
  */
 export const getGameState = (setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
-  fetch(`${API_URL}/game`)
+  fetch(`${API_URL}/game`, {
+      headers: {"x-session-id": SESSION_ID}
+    })
     .then((res) => doGetGameStateResp(res, setHistory, setCurrentMove))
     .catch(doGetError);
 }
@@ -83,7 +86,9 @@ const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) =>
  * @param setSettings 
  */
 export const getSettings = (setSettings: (settings: GameSettings) => void): void => {
-  fetch(`${API_URL}/settings`)
+  fetch(`${API_URL}/settings`, {
+      headers: {"x-session-id": SESSION_ID}
+    })
     .then((res) => doGetSettingsResp(res, setSettings))
     .catch(doGetError)
 }
@@ -174,7 +179,7 @@ export const saveGameState = (history: GameBoard[], currentMove: number): void =
   fetch(`${API_URL}/game`, {
       method: "POST",
       body: JSON.stringify({history, currentMove}),
-      headers: {"Content-Type": "application/json"}
+      headers: {"Content-Type": "application/json", "x-session-id": SESSION_ID}
     })
   .then(doSaveResp)
   .catch(doSaveError);
@@ -185,7 +190,7 @@ export const saveSettings = (gameSettings: GameSettings): void => {
   fetch(`${API_URL}/settings`, {
       method: "POST",
       body: JSON.stringify(gameSettings),
-      headers: {"Content-Type": "application/json"}
+      headers: {"Content-Type": "application/json", "x-session-id": SESSION_ID}
   })
   .then(doSaveResp)
   .catch(doSaveError);

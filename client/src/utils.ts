@@ -232,8 +232,8 @@ const minimax = (board: GameBoard, isComputerTurn: boolean, computerToken: Playe
 /**
  * Fisher-Yates shuffle algorithm.
  * 
- * @param length 
- * @returns 
+ * @param length - the length of the board to shuffle
+ * @returns - shuffled array of indices for the board
  */
 const shuffleIndices = (length: number): number[] => {
   const indices = [...Array(length).keys()];
@@ -243,3 +243,17 @@ const shuffleIndices = (length: number): number[] => {
   }
   return indices;
 };
+
+/**
+ * Gets the user's session ID (for unique state)
+ * 
+ * @returns a string representing the user's sessionId
+ */
+export const getSessionId = (): string => {
+  let sessionId = localStorage.getItem("sessionId");
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem("sessionId", sessionId);
+  }
+  return sessionId;
+}
