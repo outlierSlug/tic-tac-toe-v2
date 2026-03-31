@@ -87,7 +87,11 @@
   border-radius: 5px;
   background-color: #007bff; /* default blue */
   color: white;
-  transition: background 0.2s, opacity 0.2s;
+  transition: background 0.1s, opacity 0.1s;
+
+  /* Mobile UX improvements */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @media (hover: hover) {
