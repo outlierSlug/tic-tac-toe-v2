@@ -2,15 +2,23 @@ import type { Winner } from "../types";
 
 type StatusProps = {
   xIsNext: boolean,
-  winner: Winner
+  winner: Winner,
+  isConnecting: boolean
 };
 
 export default function Status(props: StatusProps) {
-  const {xIsNext, winner} = props;
+  const {xIsNext, winner, isConnecting} = props;
 
   // If the game is over, display winner or draw message.
   // Otherwise, show the next player.
-  if (winner === "Draw") {
+  // If client is still connecting to server, show loading state.
+  if (isConnecting) {
+    return (
+      <div className="status">
+        <p>Connecting to server<span className="connecting-dots"></span></p>
+      </div>
+    );
+  } else if (winner === "Draw") {
     return (
       <div className="status">
         Draw!

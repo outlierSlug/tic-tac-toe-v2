@@ -131,13 +131,14 @@ export default function App() {
 
   /**
    * Handles a game square (cell) clicked on by a player.
-   * Ignores clicks on already-filled squares, if the computer is moving, or after the game has ended.
+   * Ignores clicks on already-filled squares, if the client is connecting to the server,
+   * if the computer is moving, or after the game has ended.
    * Updates server and client state on click.
    *
    * @param index - the index of the clicked square
    */
   const handleClick = (index: number): void => {
-    if (currentSquares[index] || winner || isComputerThinking) {
+    if (currentSquares[index] || winner || isConnecting ||isComputerThinking) {
       return;
     }
 
@@ -316,22 +317,10 @@ export default function App() {
     setSettings(DEFAULT_SETTINGS);
   }
 
-  // If client is still connecting to server, show loading state
-  if (isConnecting) {
-    return (
-      <div className="game">
-        <h1 className="game-title">Tic-Tac-Toe</h1>
-        <div className="connecting">
-          <p>Connecting to server<span className="connecting-dots"></span></p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="game">
       <h1 className="game-title">Tic-Tac-Toe</h1>
-      <Status xIsNext={xIsNext} winner={winner} />
+      <Status xIsNext={xIsNext} winner={winner} isConnecting={isConnecting}/>
       <Board board={currentSquares} 
              onClick={handleClick} 
              winningSquares={winningSquares}
@@ -342,7 +331,7 @@ export default function App() {
                 isUndoDisabled={currentMove === 0 || isComputerThinking}
                 isRedoDisabled={currentMove === history.length - 1 || isComputerThinking}
                 isResetDisabled={history.length === 1 && currentMove === 0 || isComputerThinking}/>
-      <Settings gameStarted={hasGameStarted}
+      <Settings gameStarted={hasGameStarted || isConnecting}
                 gameSettings={settings} 
                 onChangeGridSize={handleGridSizeChange}
                 onChangeMode={handleModeChange}
