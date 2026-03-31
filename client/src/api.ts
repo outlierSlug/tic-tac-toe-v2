@@ -13,12 +13,17 @@ const SESSION_ID = getSessionId();
  * @param setHistory - React state setter function for game history
  * @param setCurrentMove - React state setter function for current move index
  */
-export const getGameState = (setHistory: (history: GameBoard[]) => void, setCurrentMove: (currentMove: number) => void): void => {
+export const getGameState = (
+  setHistory: (history: GameBoard[]) => void, 
+  setCurrentMove: (currentMove: number) => void,
+  onComplete: () => void
+): void => {
   fetch(`${API_URL}/game`, {
       headers: {"x-session-id": SESSION_ID}
     })
     .then((res) => doGetGameStateResp(res, setHistory, setCurrentMove))
-    .catch(doGetError);
+    .catch(doGetError)
+    .finally(onComplete);
 }
 
 /**
@@ -85,12 +90,13 @@ const doGetGameStateJson = (data: unknown, setHistory: (history: GameBoard[]) =>
  * 
  * @param setSettings 
  */
-export const getSettings = (setSettings: (settings: GameSettings) => void): void => {
+export const getSettings = (setSettings: (settings: GameSettings) => void, onComplete: () => void): void => {
   fetch(`${API_URL}/settings`, {
       headers: {"x-session-id": SESSION_ID}
     })
     .then((res) => doGetSettingsResp(res, setSettings))
     .catch(doGetError)
+    .finally(onComplete);
 }
 
 /**

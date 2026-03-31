@@ -29,6 +29,9 @@ export default function App() {
   const [isComputerThinking, setIsComputerThinking] = useState(false);
   const computerToken: Player = settings.player === "X" ? "O" : "X";
 
+  // State for if client is connecting to server
+  const [isConnecting, setIsConnecting] = useState(true);
+
   // Determine the current turn and game state.
   const xIsNext: boolean = currentMove % 2 === 0;
   const currentSquares: GameBoard = history[currentMove];
@@ -48,8 +51,15 @@ export default function App() {
 
   // GET current game state and settings on mount
   useEffect(() => {
-    getGameState(setHistory, setCurrentMove); 
-    getSettings(setSettings)
+    const loadInitialState = async () => {
+      await Promise.all([
+        new Promise<void>((onComplete) => getGameState(setHistory, setCurrentMove, onComplete)),
+        new Promise<void>((onComplete) => getSettings(setSettings, onComplete))
+      ]);
+      setIsConnecting(false);
+    }
+    
+    loadInitialState();
   }, []);
 
   // BUGFIX: Handle refreshes during a computer move. On refresh, will trigger the computer move again if it was interrupted.
@@ -304,6 +314,18 @@ export default function App() {
   const handleRestoreDefaults = (): void => {
     saveSettings(DEFAULT_SETTINGS);
     setSettings(DEFAULT_SETTINGS);
+  }
+
+  // If client is still connecting to server, show loading state
+  if (isConnecting) {
+    return (
+      <div className="game">
+        <h1 className="game-title">Tic-Tac-Toe</h1>
+        <div className="connecting">
+          <p>Connecting to server<span className="connecting-dots"></span></p>
+        </div>
+      </div>
+    );
   }
 
   return (

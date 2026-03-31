@@ -93,3 +93,22 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Loading message ellipses */
+.connecting-dots {
+  display: inline-block;
+  width: 24px;
+  text-align: left;
+}
+
+.connecting-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
