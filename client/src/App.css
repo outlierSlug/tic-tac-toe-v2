@@ -90,7 +90,13 @@
   transition: background 0.2s, opacity 0.2s;
 }
 
-.game-controls button:hover:not(:disabled) {
+@media (hover: hover) {
+  .game-controls button:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+}
+
+.game-controls button:active:not(:disabled) {
   background-color: #0056b3;
 }
 
