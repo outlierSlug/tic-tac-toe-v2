@@ -4,6 +4,8 @@ import { ParamsDictionary } from "express-serve-static-core"
 // Type checking for request body
 type SafeRequest = Request<ParamsDictionary, {}, Record<string, unknown>>;
 type SafeResponse = Response;
+
+// Game types
 type GameState = { history: unknown[], currentMove: number};
 type GameSettings = { gridSize: number, gameMode: string, opponent: string, player: string, difficulty: string }
 
@@ -19,6 +21,7 @@ const DEFAULT_GAME_STATE: GameState = { history: [Array(9).fill(null)], currentM
 // In-memory storage for the current settings. 
 const DEFAULT_SETTINGS: GameSettings = { gridSize: 3, gameMode: "classic", opponent: "local", player: "X", difficulty: "easy" };
 
+// Validation constants (for game types)
 const VALID_GRID_SIZES = [3, 4, 5];
 const VALID_GAME_MODES = ["classic", "endless"];
 const VALID_OPPONENTS = ["local", "computer"];
@@ -30,15 +33,15 @@ const VALID_DIFFICULTIES = ["easy", "hard"];
  * Returns the current game state as JSON. 
  * Called by the client on page load/refresh.
  * 
- * @param _req - unused request object
+ * @param req - request object
  * @param res - response object that sends gameState as JSON
  */
 export const getGameState = (req: SafeRequest, res: SafeResponse): void => {
-  const sessionId = req.headers["x-session-id"] as string;
+  const sessionId = getSessionId(req, res);
   if (!sessionId) {
-    res.status(400).send("Missing session ID");
     return;
   }
+
   const gameState = getSession(gameSessions, sessionId, DEFAULT_GAME_STATE)
   res.json(gameState);
 }
@@ -49,12 +52,10 @@ export const getGameState = (req: SafeRequest, res: SafeResponse): void => {
  * 
  * @param req - request object containing the new game state in req.body
  * @param res - response object, sends 200 OK on success or 400 on invalid request body
- * @returns 
  */
 export const setGameState = (req: SafeRequest, res: SafeResponse): void => {
-  const sessionId = req.headers["x-session-id"] as string;
+  const sessionId = getSessionId(req, res);
   if (!sessionId) {
-    res.status(400).send("Missing session ID");
     return;
   }
 
@@ -73,22 +74,33 @@ export const setGameState = (req: SafeRequest, res: SafeResponse): void => {
   res.status(200).send("OK");
 }
 
-// GET /settings
+/**
+ * GET /settings
+ * Returns the current game settings as JSON.
+ * Called by the client on page load/refresh.
+ * 
+ * @param req - request object
+ * @param res - response object that sends gameSettings as JSON
+ */
 export const getSettings = (req: SafeRequest, res: SafeResponse): void => {
-  const sessionId = req.headers["x-session-id"] as string;
+  const sessionId = getSessionId(req, res);
   if (!sessionId) {
-    res.status(400).send("Missing session ID");
     return;
   }
+
   const gameSettings = getSession(settingsSessions, sessionId, DEFAULT_SETTINGS);
   res.json(gameSettings);
 }
 
-// POST /settings
+/**
+ * POST /settings
+ * 
+ * @param req - request object containing the new gameSettings in req.body
+ * @param res - response object, sends 200 OK on success and 400 on invalid request body
+ */
 export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
-  const sessionId = req.headers["x-session-id"] as string;
+  const sessionId = getSessionId(req, res);
   if (!sessionId) {
-    res.status(400).send("Missing session ID");
     return;
   }
 
@@ -128,9 +140,35 @@ export const setSettings = (req: SafeRequest, res: SafeResponse): void => {
   res.status(200).send("Settings saved successfully");
 }
 
+/**
+ * Helper method that gets the session object for the given sessionId.
+ * If the map does not contain the sessionId, a new session mapping is created with that id.
+ * 
+ * @template T
+ * @param map - stores session objects keyed by sessionId
+ * @param sessionId - the unique identifier for the session
+ * @param defaultValue - the default session value (used to create a new session mapping)
+ * @returns the session object
+ */
 const getSession = <T>(map: Map<string, T>, sessionId: string, defaultValue: T): T => {
   if (!map.has(sessionId)) {
     map.set(sessionId, {...defaultValue});
   }
   return map.get(sessionId)!;
+}
+
+/**
+ * Helper method that gets the sessionId from the request object headers.
+ * 
+ * @param req - the request object
+ * @param res - the response object 
+ * @returns the sessionId as a string, or null if there is none
+ */
+const getSessionId = (req: SafeRequest, res: SafeResponse): string | null => {
+  const sessionId = req.headers["x-session-id"] as string;
+  if (!sessionId) {
+    res.status(400).send("Missing session ID");
+    return null;
+  }
+  return sessionId;
 }
