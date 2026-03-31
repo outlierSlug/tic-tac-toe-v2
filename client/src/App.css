@@ -41,7 +41,13 @@
   transition: background 0.2s;
 }
 
-.square:hover {
+@media (hover: hover) {
+  .square:hover {
+    background: #ddd;
+  }
+}
+
+.square:active {
   background: #ddd;
 }
 
